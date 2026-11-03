@@ -35,7 +35,14 @@ jobs:
           mix archive.install hex nerves_bootstrap 1.15.0 --force
 
       - run: mix deps.get
-      - run: mix nerves.system.lint nerves_defconfig
+      # Run from the linter's own project: from the root, Nerves first tries
+      # to build this system (no artifact exists yet), i.e. a full Buildroot
+      # build. MIX_ENV=test skips the linter's dev-only deps.
+      - name: Lint nerves_defconfig
+        working-directory: deps/nerves_system_linter
+        env:
+          MIX_ENV: test
+        run: mix nerves.system.lint "$GITHUB_WORKSPACE/nerves_defconfig"
       - run: shellcheck post-build.sh post-createfs.sh
 
   build:
