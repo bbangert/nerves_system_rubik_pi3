@@ -1,6 +1,42 @@
 # Changelog
 
-## v0.6.0
+## v0.1.0
+
+Initial release, extracted from bbangert/nerves_system_vagus `rubik_pi3/`
+at 30129cf (its v0.6.0 line: nerves_system_br 1.35.3 / Buildroot
+2026.08.1 / Erlang/OTP 29.1.2 / toolchain 15.3.1 / Linux qcom-next
+`qcom-next-7.3-rc4-20261014` + 2 patches) as a product-neutral board
+system for the Thundercomm Rubik Pi 3: GRUB2 arm64-efi A/B boot from the
+onboard UFS (UFS-only layout, 4Kn GPT via `tools/mk_ufs_image.py`), the
+kernel with `linux-7.3.defconfig`, `linux-hwdebug.config` and patches 0003
+(sc7280 UFS HS-G4 PHY table) and 0004 (`aspm-no-l1ss` on the M.2 port),
+the AP6256 WiFi/BT firmware, `rubik-usb-fw` for the uPD720201 USB3
+controller, `rubik-boardid`, wpa_supplicant, wireless-regdb, the Realtek
+USB BT dongle firmware, and the fastrpc / Hexagon DSP firmware foundation.
+
+* The app is `:nerves_system_rubik`; artifacts are published to this
+  repo's GitHub releases.
+* `post-build.sh`, `post-createfs.sh` and `external.mk` find their files
+  relative to themselves, so the system also works vendored under a
+  product's `base/` directory. A `grub.cfg` next to the product's
+  `nerves_defconfig` replaces the base one.
+
+Not carried over (product layer, see nerves_system_vagus): BlueZ, D-Bus
+and bluez-alsa; the podman container stack (crun, netavark, podman,
+conmon, catatonit, containers-image-config, nftables, util-linux); the
+bluetooth, containers and memory kernel fragments; nfs-utils;
+`/etc/sysctl.conf`; the `/etc/resolv.conf` symlink; and the configfs and
+cgroup2 mounts in `erlinit.config`. `grub.cfg` keeps
+`cgroup_no_v1=all cgroup_enable=memory`, which is harmless without them.
+
+Layered back under nerves_system_vagus `rubik_pi3` it is build-identical
+to v0.6.0 there, so the hardware proofs carry over. Those proofs were
+taken on the nerves_system_br 1.34.4 line; the 1.35.3 move is build-proof
+only (see docs/validation.md).
+
+## History (as nerves_system_vagus rubik_pi3)
+
+### v0.6.0
 
 Repo tag v0.8.0. nerves_system_br and toolchain update, plus the board id
 from the SoC serial. Build-proof only so far: hardware validation is
@@ -19,7 +55,7 @@ pending.
   `nerves-<last 4 of the SoC serial>` on its first boot of this release, and
   its Remote Control session name changes with it.
 
-## v0.5.1
+### v0.5.1
 
 Repo tag v0.7.1. The kernel no longer sets the system clock from the PMIC RTC
 (`# CONFIG_RTC_HCTOSYS is not set`). The RTC has no backup battery, so after a
@@ -30,7 +66,7 @@ failed, so the agent flavor could not pull its images at boot. nerves_time's
 file time now floors the next boot, ntpd corrects it, and `CONFIG_RTC_SYSTOHC`
 still keeps the RTC written (#33).
 
-## v0.5.0
+### v0.5.0
 
 Repo tag v0.7.0. First device bring-up. v0.4.0 (kernel 7.2.10) was flashed to a 128 GB UFS
 board on 2026-10-23 and boots to iex: UEFI → GRUB → mainline DTB → kernel
@@ -95,7 +131,7 @@ Ethernet, USB3, watchdog, GPU/display probe and an A → B OTA work.
   serial console details (CH343 bridge on the micro-USB port) and a
   device-proven status table.
 
-## v0.4.0
+### v0.4.0
 
 Repo tag v0.6.0. Follows `dragon_q6a`: the `linux-hwdebug.config` fragment (hidraw, extra USB
 serial drivers, usbmon, USB/IP host, CAN dongles, knfsd, HID gadget function,
@@ -103,7 +139,7 @@ serial drivers, usbmon, USB/IP host, CAN dongles, knfsd, HID gadget function,
 the NFS server tools. Build-proof on dragon_q6a only; the usbip userland is
 not included (needs udev).
 
-## v0.3.0
+### v0.3.0
 
 Repo tag v0.5.0. Follows `dragon_q6a`: podman replaces balenaEngine as the
 container engine, and nftables replaces iptables. Build-proof only: this
@@ -139,7 +175,7 @@ target has never booted on hardware.
   balenaEngine's selects: `mount`, `swapon`, `mkswap`, `mountpoint` and
   `pivot_root` stay, and `nsenter` is added. `cgroupfs-mount` is gone.
 
-## v0.2.0
+### v0.2.0
 
 Repo tag v0.4.0. Follows `dragon_q6a` to kernel 7.2, with the same fastrpc,
 balenaEngine and `nerves_system_br` moves. Build-proof only: this target
@@ -179,7 +215,7 @@ has never booted on hardware.
   → 2.8.3 and GLib 2.86.5 → 2.88.3. GRUB (2.12), fwup (1.16.0) and the
   toolchain (15.3.0) are unchanged.
 
-## v0.1.1
+### v0.1.1
 
 Kernel memory tuning, shared with `dragon_q6a` (this target's 7.1 defconfig
 tracks it symbol-for-symbol). This target has never booted on hardware, so
@@ -215,7 +251,7 @@ from `dragon_q6a`. Closes #18 (kernel half).
   64 MiB` in place of the ratio defaults; `vm.swappiness` is removed (set
   at runtime by `Vagus.Host.Swap` once it ships).
 
-## v0.1.0
+### v0.1.0
 
 Initial Rubik Pi 3 (QCS6490) target, forked from the `dragon_q6a` target:
 mainline Linux 7.1, EDK2 UEFI + GRUB2 (arm64-efi) boot chain with A/B
