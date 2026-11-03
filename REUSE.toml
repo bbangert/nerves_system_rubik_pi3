@@ -3,8 +3,9 @@ version = 1
 [[annotations]]
 path = [
  ".formatter.exs",
- ".github/CODEOWNERS",
  ".gitignore",
+ ".tool-versions",
+ ".github/**",
  "CHANGELOG.md",
  "nerves_defconfig",
  "NOTICE",
@@ -19,10 +20,11 @@ SPDX-License-Identifier = "CC0-1.0"
 
 [[annotations]]
 path = [
- "README.md"
+ "README.md",
+ "docs/**"
 ]
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2016 Frank Hunleth"
+SPDX-FileCopyrightText = "2026 Ben Bangert"
 SPDX-License-Identifier = "CC-BY-4.0"
 
 # Buildroot derived or related files
@@ -44,6 +46,7 @@ SPDX-License-Identifier = "GPL-2.0-or-later"
 [[annotations]]
 path = [
  "linux-7.3.defconfig",
+ "linux-hwdebug.config",
  "patches/**"
 ]
 precedence = "override"
@@ -66,8 +69,18 @@ SPDX-License-Identifier = "CC0-1.0"
 path = [
  "grub.cfg",
  "test_src/**",
+ "tools/**",
  "rootfs_overlay/**"
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "None"
 SPDX-License-Identifier = "CC0-1.0"
+
+# Board diagrams drawn for this repository
+[[annotations]]
+path = [
+ "assets/**"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Ben Bangert"
+SPDX-License-Identifier = "CC-BY-4.0"
