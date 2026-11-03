@@ -35,14 +35,21 @@ jobs:
           mix archive.install hex nerves_bootstrap 1.15.0 --force
 
       - run: mix deps.get
+
       # Run from the linter's own project: from the root, Nerves first tries
       # to build this system (no artifact exists yet), i.e. a full Buildroot
-      # build. MIX_ENV=test skips the linter's dev-only deps.
+      # build. MIX_ENV=test skips the linter's dev-only deps. Given just a
+      # defconfig path the task exits 0 even when checks fail, so the
+      # "Failed checks:" section is grepped instead.
       - name: Lint nerves_defconfig
         working-directory: deps/nerves_system_linter
         env:
           MIX_ENV: test
-        run: mix nerves.system.lint "$GITHUB_WORKSPACE/nerves_defconfig"
+        run: |
+          out=$(mix nerves.system.lint "$GITHUB_WORKSPACE/nerves_defconfig")
+          echo "$out"
+          failed=$(echo "$out" | sed -n '/^Failed checks:/,$p' | grep '^ensure' || true)
+          test -z "$failed"
       - run: shellcheck post-build.sh post-createfs.sh
 
   build:

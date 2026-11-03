@@ -36,9 +36,9 @@ LBA math, so it would corrupt a 4Kn GPT; running it on a UFS-flashed board is
 disallowed, and generation-time sizing here replaces it.
 
 Usage:
-    mk_ufs_image.py --input rubik_pi3.img --disk-bytes 128G --out rubik_pi3_ufs
-    mk_ufs_image.py --input rubik_pi3.img --disk-bytes 137438953472 \
-        --out rubik_pi3_ufs --full
+    mk_ufs_image.py --input rubik.img --disk-bytes 128G --out rubik_ufs
+    mk_ufs_image.py --input rubik.img --disk-bytes 137438953472 \
+        --out rubik_ufs --full
 
 Default output (two pieces, for edl-ng's write-sector):
     <out>.img              MBR + primary GPT + the source's partition data,

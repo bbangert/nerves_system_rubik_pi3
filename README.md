@@ -59,8 +59,8 @@ reflash over EDL.
 ## Hardware support
 
 All proofs were taken on the nerves_system_br 1.34.4 / toolchain 15.3.0
-line; the move to 1.35.3 / 15.3.1 is build-proof only until re-gated.
-The evidence, with dates, is in [docs/validation.md](docs/validation.md).
+line (the 1.35.3 / 15.3.1 move is build-proof only until re-gated); the
+evidence for every row, with dates, is in [docs/validation.md](docs/validation.md).
 
 | Feature | Status | Notes |
 | --- | --- | --- |
@@ -78,85 +78,16 @@ The evidence, with dates, is in [docs/validation.md](docs/validation.md).
 | USB-C gadget (`usb0`) | No | The UDC probes; no gadget function is configured |
 | Audio (3.5 mm jack) | Untested | No proof recorded |
 | Watchdog (gunyah_wdt) | Yes | `/dev/watchdog0`, armed by `nerves_heart` (32 s) |
-| RTC (PMIC) | Partial | Holds time across reboot; no backup battery fitted, so 1970 after power loss; `CONFIG_RTC_HCTOSYS` deliberately off |
+| RTC (PMIC) | Partial | Holds time across reboot; no backup battery was fitted (2-pin connector), so 1970 after power loss and TLS fails until NervesTime syncs (~3 min): wait for `NervesTime.synchronized?/0`. `CONFIG_RTC_HCTOSYS` is off, see [docs/validation.md](docs/validation.md) |
 | Board id / hostname from SoC serial | Untested | `rubik-boardid`, build-proof only |
 | 40-pin header (GPIO/I2C/SPI/UART) | Untested | |
 | PCIe / M.2 NVMe (data) | Yes | Samsung 970 EVO Plus, ~1 GiB/s; needs patch 0004 (`aspm-no-l1ss`); not a boot option |
-| NPU / DSP (fastrpc + QAIRT) | Yes | `fastrpc_test` 3/3 on the CDSP; QAIRT 2.47 HTP context-binary run, 2026-10-23 |
-| Video codec (Venus) | Partial | Decode 30/30 frames; encode untested |
+| NPU / DSP (fastrpc + QAIRT) | Yes | `fastrpc_test` 3/3 on the CDSP; QAIRT 2.47 HTP context-binary run, 2026-10-23. See [docs/ai-foundation.md](docs/ai-foundation.md); the app starts the fastrpc daemons ([docs/dsp-supervision.md](docs/dsp-supervision.md)) |
+| Video codec (Venus) | Partial | Decode 30/30 frames; encode untested; device nodes in [docs/ai-foundation.md](docs/ai-foundation.md) |
 | MIPI CSI cameras | No | No sensor bring-up |
 | PWM fan | Partial | `pwm-fan` cooling device bound to `cpu0-thermal`; no fan fitted, spin-up untested |
 | RGB LED | Untested | |
 | Hardware-debug device classes | Untested | `linux-hwdebug.config`, build-proof only |
-
-### AI foundation contract
-
-What this system guarantees to applications (the fastrpc, Venus and NPU
-rows above):
-
-- **Kernel**: `QCOM_FASTRPC` built in; `/dev/fastrpc-adsp`,
-  `/dev/fastrpc-cdsp` and `/dev/fastrpc-cdsp-secure`; DMA-BUF system heap
-  at `/dev/dma_heap/system`; two Venus nodes, a decoder and an encoder, at
-  `/dev/video0` and `/dev/video1` in either order (module load order).
-  Identify them by `/sys/class/video4linux/*/name` (`qcom-venus-decoder` /
-  `qcom-venus-encoder`).
-- **Firmware** (`/lib/firmware/qcom/...`, installed by
-  `package/rubik-pi3-firmware`): a board-native ADSP pair from upstream
-  linux-firmware (`qcom/qcs6490/Thundercomm/RubikPi3/adsp.mbn` =
-  `ADSP.HT.5.5.c8-00217-KODIAK-1`, with matching fastrpc shells), and a
-  generic CDSP pair (`qcom/qcs6490/cdsp.mbn` = `CDSP.HT.2.5.c3-00134-KODIAK-1`,
-  since no Rubik Pi 3 CDSP set exists upstream). Adreno GMU/SQE/zap
-  (`a660_*`) and Venus (`vpu-2.0/venus.mbn`) firmware come from the same
-  linux-firmware pin.
-- **DSP-side libraries**: `/usr/lib/dsp/cdsp` and `/usr/lib/dsp/adsp`
-  (per-domain directories, because the sysmon skel filenames collide
-  between sets). fastrpc's built-in search path is patched to include
-  both, `cdsp/` first; ADSP-domain processes should set
-  `ADSP_LIBRARY_PATH` explicitly.
-- **fastrpc userspace** (v1.0.8): `libcdsprpc.so`/`libadsprpc.so`, the
-  `adsprpcd`/`cdsprpcd` daemons in `/usr/sbin`, `fastrpc_test` (+ v68 test
-  skels) and `fastrpc-healthcheck` in `/usr/bin`. `fastrpc-healthcheck`
-  can't confirm modules here: it expects meta-qcom's `/usr/share/qcom`
-  layout.
-- **`libstdc++` in the target rootfs**, which QAIRT needs.
-- **QAIRT is not shipped.** Applications provision the QAIRT runtime
-  bundle (and models) to `/data` themselves. 2.47.0.260601 was validated
-  with `ADSP_LIBRARY_PATH="/data/qairt/dsp;/usr/lib/dsp/cdsp"`.
-- **udev rules** at `/etc/udev/rules.d/99-qcom-ai.rules` document the
-  device permissions. Nerves itself runs no udev (the app runs as root);
-  they apply where udev rules are evaluated. fastrpc also installs
-  `/lib/udev/rules.d/60-fastrpc.rules` and `/usr/lib/sysusers.d/fastrpc.conf`,
-  equally inert here; `99-qcom-ai.rules` sorts later, so its `MODE="0666"`
-  wins.
-
-A build-time matched-pair check in `rubik-pi3-firmware.mk` fails the build
-if the installed CDSP/ADSP `.mbn` and their fastrpc shells don't carry the
-same `QC_IMAGE_VERSION_STRING`. A mismatch would otherwise only surface at
-runtime as fastrpc error `0x80000600` with no kernel log.
-
-### DSP daemons
-
-The system ships the fastrpc daemons but does not start or supervise them;
-there is no init system on Nerves. Start them from your OTP application
-(e.g. with [MuonTrap](https://hex.pm/packages/muontrap)) so restarts,
-backoff and shutdown ride the app's supervision tree:
-
-```sh
-DSP_LIBRARY_PATH="/usr/lib/dsp/cdsp;" cdsprpcd &
-ADSP_LIBRARY_PATH="/usr/lib/dsp/adsp;" adsprpcd &
-```
-
-Bare names resolve because `/usr/sbin` is on erlinit's default `PATH`.
-
-### RTC and clock
-
-The PMIC RTC had no backup battery fitted on the tested board (the board
-has a 2-pin RTC battery connector). A board whose RTC was never set, or
-lost power, boots at 1970, and NervesTime's ntpd (started before DHCP/DNS)
-takes about 3 minutes to sync, so TLS fails until then. Applications that
-need TLS at boot should wait for `NervesTime.synchronized?/0`.
-`CONFIG_RTC_HCTOSYS` is off because `rtc-pm8xxx` is a module: its hctosys
-ran after nerves_time had set the clock and dragged it back to 1970.
 
 ## Building
 

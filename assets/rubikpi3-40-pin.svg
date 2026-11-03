@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 690" font-family="Helvetica, Arial, sans-serif" font-size="13">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 708" font-family="Helvetica, Arial, sans-serif" font-size="13">
   <title>Thundercomm Rubik Pi 3 40-pin header, default functions</title>
-  <rect width="760" height="690" fill="#ffffff"/>
+  <rect width="760" height="708" fill="#ffffff"/>
   <text x="20" y="26" fill="#1f2328" font-size="15" font-weight="bold">Rubik Pi 3 40-pin header: default functions (3.3 V logic)</text>
   <rect x="330" y="40" width="100" height="568" rx="10" fill="#1f2a33"/>
   <circle cx="360" cy="60" r="11" fill="#f4a261" stroke="#ffffff" stroke-width="1.5"/>
@@ -163,7 +163,8 @@
   <text x="400" y="596" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">40</text>
   <rect x="440" y="582" width="140" height="20" rx="4" fill="#d4a017"/>
   <text x="510.0" y="597" fill="#ffffff" text-anchor="middle">I2S1_DOUT</text>
-  <text x="20" y="632" fill="#57606a" font-size="12">Default functions as published by Thundercomm (Rubik Pi 3 user manual, "40-pin LS connector"). GPIO_n is the SoC GPIO number.</text>
-  <text x="20" y="650" fill="#57606a" font-size="12">Most pins mux to other I2C/SPI/UART/I2S functions; see Thundercomm's pin table. Not verified on this system's kernel.</text>
-  <text x="20" y="668" fill="#57606a" font-size="12">Drawn for this repository; not a copy of Thundercomm's figure.</text>
+  <text x="20" y="632" fill="#57606a" font-size="12">Default functions as published by Thundercomm (Rubik Pi 3 user manual, "40-pin LS connector").</text>
+  <text x="20" y="650" fill="#57606a" font-size="12">GPIO_n is the SoC GPIO number. Most pins mux to other I2C/SPI/UART/I2S functions;</text>
+  <text x="20" y="668" fill="#57606a" font-size="12">see Thundercomm's pin table. Not verified on this system's kernel.</text>
+  <text x="20" y="686" fill="#57606a" font-size="12">Drawn for this repository; not a copy of Thundercomm's figure.</text>
 </svg>

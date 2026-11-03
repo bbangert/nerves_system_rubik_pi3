@@ -1,4 +1,4 @@
-# rubik_pi3 kernel config (Thundercomm Rubik Pi 3, QCS6490)
+# Rubik Pi 3 kernel config (Thundercomm Rubik Pi 3, QCS6490)
 #
 # Built against Qualcomm's qcom-next integration tree
 # (github.com/qualcomm-linux/kernel, the linux-qcom-next kernel meta-qcom
@@ -1235,6 +1235,8 @@ CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT=y
 CONFIG_DEBUG_INFO_REDUCED=y
 CONFIG_MAGIC_SYSRQ=y
 CONFIG_DEBUG_FS=y
+# Reboot on panic rather than hang headless; the watchdog is only a backstop.
+CONFIG_PANIC_TIMEOUT=10
 # CONFIG_SCHED_DEBUG is not set
 # CONFIG_DEBUG_PREEMPT is not set
 # CONFIG_FTRACE is not set
