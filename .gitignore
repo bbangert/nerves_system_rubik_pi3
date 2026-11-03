@@ -21,3 +21,9 @@ erl_crash.dump
 /archive.log
 /.nerves
 /test_src/venus_dec_smoke
+
+# Built system artifacts
+*.tar.gz
+.nerves/
+_build/
+deps/

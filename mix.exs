@@ -1,10 +1,9 @@
-defmodule NervesSystemRubikPi3.MixProject do
+defmodule NervesSystemRubik.MixProject do
   use Mix.Project
 
   @github_organization "bbangert"
-  @app :nerves_system_rubik_pi3
-  @releases_repo "bbangert/nerves_system_vagus"
-  @source_url "https://github.com/#{@releases_repo}"
+  @app :nerves_system_rubik
+  @source_url "https://github.com/#{@github_organization}/#{@app}"
   @version Path.join(__DIR__, "VERSION")
            |> File.read!()
            |> String.trim()
@@ -13,7 +12,7 @@ defmodule NervesSystemRubikPi3.MixProject do
     [
       app: @app,
       version: @version,
-      # Because we're using OTP 29, we need to enforce Elixir 1.17 or later.
+      # OTP 29 needs Elixir 1.17 or later.
       elixir: "~> 1.17",
       compilers: Mix.compilers() ++ [:nerves_package],
       nerves_package: nerves_package(),
@@ -45,7 +44,7 @@ defmodule NervesSystemRubikPi3.MixProject do
     [
       type: :system,
       artifact_sites: [
-        {:github_releases, @releases_repo}
+        {:github_releases, "#{@github_organization}/#{@app}"}
       ],
       build_runner_opts: build_runner_opts(),
       platform: Nerves.System.BR,
@@ -131,6 +130,7 @@ defmodule NervesSystemRubikPi3.MixProject do
       "linux-hwdebug.config",
       "mix.exs",
       "nerves_defconfig",
+      "NOTICE",
       "patches",
       "post-build.sh",
       "post-createfs.sh",
